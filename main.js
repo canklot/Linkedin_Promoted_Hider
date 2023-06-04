@@ -14,14 +14,7 @@ observer.observe(document, {
   attributes: true
 });
 
-/* chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "changePromotedLanguage") {
-    chrome.scripting.executeScript({
-      function: processPageElements,
-      args: [request.text],
-    });
-  }
-}); */
+
 
 function getElementsByXPath(xpath) {
   const elements = [];
