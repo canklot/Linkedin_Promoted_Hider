@@ -1,7 +1,3 @@
-
-
-
-
 function getElementsByXPath(xpath) {
   const elements = [];
   const query = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
@@ -23,21 +19,6 @@ function hidePromotedJobs(promotedText= 'Promoted'){
   const elemets = getElementsByXPath(promotedxpath);
   elemets.forEach(hideElement);
 }
-
-function detectLanguage(){
-  const messagesXpath = '//*[@id="msg-overlay"]/div[1]/header/div[2]/button/span/span[1]'
-  const elemets = getElementsByXPath(messagesXpath);
-  const homePageText = elemets[0].textContent
-  if(homePageText=="Mesajlaşma"){
-    return "Öne çıkarılan içerik";
-  }
-  if(homePageText=="Home"){
-    return "Promoted";
-  }
-  
-}
-
-detectLanguage();
 
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
