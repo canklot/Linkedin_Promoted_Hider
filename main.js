@@ -1,6 +1,18 @@
 alert("extension activated");
-setTimeout(main, 11000);
-setTimeout(function(){alert("extension finished"); }, 11000); 
+
+MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+var observer = new MutationObserver(function(mutations, observer) {
+    // fired when a mutation occurs
+    main();
+});
+
+// define what element should be observed by the observer
+// and what types of mutations trigger the callback
+observer.observe(document, {
+  subtree: true,
+  attributes: true
+});
 
 function getElementsByXPath(xpath) {
   const elements = [];
@@ -20,7 +32,6 @@ function hideElement(element) { element.style.display = "none"; }
 function main(){
   const promotedxpath = "//node()[div/div[1]/ul/li[1][contains(text(), 'Promoted')]]"
   const elemets = getElementsByXPath(promotedxpath);
-  
   elemets.forEach(hideElement);
 }
 
