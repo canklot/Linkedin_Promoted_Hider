@@ -1,5 +1,6 @@
-alert("hello world");
-main();
+alert("extension activated");
+setTimeout(main, 11000);
+setTimeout(function(){alert("extension finished"); }, 11000); 
 
 function getElementsByXPath(xpath) {
   const elements = [];
@@ -17,8 +18,8 @@ function getElementsByXPath(xpath) {
 function hideElement(element) { element.style.display = "none"; }
 
 function main(){
-  const promotedxpath = '//*[@id="ember152"]/div/div[1]/ul/li[1]'
-  const elemets = getElementsByXPath("//node()[div/a[contains(text(), 'Attributes')]]");
+  const promotedxpath = "//node()[div/div[1]/ul/li[1][contains(text(), 'Promoted')]]"
+  const elemets = getElementsByXPath(promotedxpath);
   
   elemets.forEach(hideElement);
 }
