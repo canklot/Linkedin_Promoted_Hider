@@ -16,5 +16,12 @@
     ],
     "host_permissions": [
         "https://www.linkedin.com/*"
-    ]
+    ],
+    "icons": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+    },
+    "author": "Canklot",
+    "homepage_url": "https://github.com/canklot"
 }
