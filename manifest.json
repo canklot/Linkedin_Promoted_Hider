@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Text Hide Extension",
+    "name": "Linkedin Promoted Job Hider Extension",
     "version": "1.0",
-    "description": "Hides HTML elements based on specific text",
+    "description": "Hides promoted jobs on linkedin",
     "content_scripts": [
         {
             "matches": [
