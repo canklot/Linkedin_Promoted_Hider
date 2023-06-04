@@ -1,18 +1,4 @@
-//alert("extension activated");
 
-MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-
-var observer = new MutationObserver(function(mutations, observer) {
-    // fired when a mutation occurs
-    hidePromotedJobs();
-});
-
-// define what element should be observed by the observer
-// and what types of mutations trigger the callback
-observer.observe(document, {
-  subtree: true,
-  attributes: true
-});
 
 
 
@@ -38,4 +24,31 @@ function hidePromotedJobs(promotedText= 'Promoted'){
   elemets.forEach(hideElement);
 }
 
+function detectLanguage(){
+  const messagesXpath = '//*[@id="msg-overlay"]/div[1]/header/div[2]/button/span/span[1]'
+  const elemets = getElementsByXPath(messagesXpath);
+  const homePageText = elemets[0].textContent
+  if(homePageText=="Mesajlaşma"){
+    return "Öne çıkarılan içerik";
+  }
+  if(homePageText=="Home"){
+    return "Promoted";
+  }
+  
+}
 
+detectLanguage();
+
+MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+var observer = new MutationObserver(function(mutations, observer) {
+    // fired when a mutation occurs
+    hidePromotedJobs();
+});
+
+// define what element should be observed by the observer
+// and what types of mutations trigger the callback
+observer.observe(document, {
+  subtree: true,
+  attributes: true
+});
