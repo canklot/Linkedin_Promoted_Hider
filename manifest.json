@@ -3,15 +3,11 @@
     "name": "Linkedin Promoted Job Hider Extension",
     "version": "1.0",
     "description": "Hides promoted jobs on linkedin",
-    "permissions": [
-        "activeTab",
-        "scripting",
-        "storage"
-    ],
+    "permissions": [],
     "content_scripts": [
         {
             "matches": [
-                "<all_urls>"
+                "https://www.linkedin.com/*"
             ],
             "js": [
                 "main.js"
@@ -20,13 +16,10 @@
         }
     ],
     "host_permissions": [
-        "<all_urls>"
+        "https://www.linkedin.com/*"
     ],
     "action": {
         "default_popup": "popup.html"
-    },
-    "background": {
-        "service_worker": "background.js"
     },
     "icons": {
         "16": "icons/icon16.png",

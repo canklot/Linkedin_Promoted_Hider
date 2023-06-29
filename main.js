@@ -13,18 +13,24 @@ function getElementsByXPath(xpath) {
 
 function hideElement(element) { element.style.display = "none"; }
 
-function hidePromotedJobs(promotedText= 'Promoted'){
+function hidePromotedJobs(promotedText){
   //Template literals are literals delimited with backtick (`) characters, string interpolation with embedded expressions
-  const promotedxpath = `//node()[div/div[1]/ul/li[1][contains(text(), '${promotedText}')]]`
+  const promotedxpath = `//li[contains(. , '${promotedText}')]`
+  //li[contains(.,'Promoted')]
   const elemets = getElementsByXPath(promotedxpath);
   elemets.forEach(hideElement);
 }
+
+const otherLangsList = ["Promoted","Öne çıkarılan içerik","Anzeige","Promocionado","Sponsorisé"];
 
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
 var observer = new MutationObserver(function(mutations, observer) {
     // fired when a mutation occurs
-    hidePromotedJobs();
+    otherLangsList.forEach(lang => {
+      hidePromotedJobs(lang);
+    });
+    
 });
 
 // define what element should be observed by the observer
