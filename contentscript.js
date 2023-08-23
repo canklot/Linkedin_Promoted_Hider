@@ -39,3 +39,22 @@ observer.observe(document, {
   subtree: true,
   attributes: true
 });
+
+// Test messaging
+var timer = 0;
+  var si = setInterval(() => {
+            try {
+               chrome.runtime.sendMessage({
+                    data: "This is a message send by contentscript"
+                }, function (response) {
+                    console.dir(response.data);
+                });
+                timer++;
+                if (timer === 3) {
+                    clearInterval(si);
+                }
+            } catch (error) {
+                // debugger;
+                console.log(error);
+            }
+        }, 2000);
