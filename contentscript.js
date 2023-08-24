@@ -1,3 +1,5 @@
+let onOffStatus = "On";
+
 function getElementsByXPath(xpath) {
   const elements = [];
   const query = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
@@ -14,6 +16,9 @@ function getElementsByXPath(xpath) {
 function hideElement(element) { element.style.display = "none"; }
 
 function hidePromotedJobs(promotedText){
+  if (onOffStatus==="Off"){
+    return;
+  }
   //Template literals are literals delimited with backtick (`) characters, string interpolation with embedded expressions
   const promotedxpath = `//li[contains(. , '${promotedText}')]`
   //li[contains(.,'Promoted')]
@@ -29,8 +34,7 @@ var observer = new MutationObserver(function(mutations, observer) {
     // fired when a mutation occurs
     otherLangsList.forEach(lang => {
       hidePromotedJobs(lang);
-    });
-    
+    }); 
 });
 
 // define what element should be observed by the observer
@@ -41,20 +45,16 @@ observer.observe(document, {
 });
 
 // Test messaging
-var timer = 0;
-  var si = setInterval(() => {
-            try {
-               chrome.runtime.sendMessage({
-                    data: "This is a message send by contentscript"
-                }, function (response) {
-                    console.dir(response.data);
-                });
-                timer++;
-                if (timer === 3) {
-                    clearInterval(si);
-                }
-            } catch (error) {
-                // debugger;
-                console.log(error);
-            }
-        }, 2000);
+
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    if (request.onOffStatus === "On" || request.onOffStatus === "Off"){
+      onOffStatus = onOffStatus;
+      sendResponse({onOffStatus: "Contentscript recieved the on off status"});
+    }
+    else{
+      sendResponse({onOffStatus: "Wrong parameter"});
+    }
+ 
+  }
+);

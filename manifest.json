@@ -3,13 +3,7 @@
     "name": "Linkedin Promoted Job Hider Extension",
     "version": "1.1",
     "description": "Hides promoted jobs on linkedin/n Dont waste time on unrelated promoted job postings on linkedin. This extension hides promoted jobs postings on linkedin so you can focus on the jobs you are really interested./n    /n Supported languages: English, Turkish, German, French, Spanish/n    /n This extension is open source. /n https: //github.com/canklot/Linkedin_Promoted_Hider",
-    "permissions": [
-        "background",
-        "tabs",
-        "activeTab",
-        "storage",
-        "webRequest"
-    ],
+    "permissions": [],
     "content_scripts": [
         {
             "matches": [
