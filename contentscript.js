@@ -48,13 +48,17 @@ observer.observe(document, {
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    if (request.onOffStatus === "On" || request.onOffStatus === "Off"){
-      onOffStatus = onOffStatus;
+    console.log( "Contentscript recieved the on off status");
+    if (request.data === "On" || request.data === "Off"){
+      onOffStatus = request.data;
       sendResponse({onOffStatus: "Contentscript recieved the on off status"});
     }
+    else if(request.data==="getStatus")
+      sendResponse({data: onOffStatus});
     else{
-      sendResponse({onOffStatus: "Wrong parameter"});
+      sendResponse({data: "Wrong parameter"});
     }
- 
   }
 );
+
+console.log("content script counter");
