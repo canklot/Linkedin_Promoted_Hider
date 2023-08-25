@@ -3,23 +3,27 @@
 
 <head>
     <title>Linkedin Promoted Job Hider</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@0.7.4/dist/tailwind.min.css" rel="stylesheet">
+    <link href="flowbite.css" rel="stylesheet">
 </head>
 
 <body class="w-64 h-16 p-2">
-    <h2 class="p-2">Linkedin Promoted Job Hider</h2>
+    <h2 class="text-center p-2 font-bold text-lg justify-center">Linkedin Promoted Job Hider</h2>
 
+    <div class="max-w-lg mx-auto p-2">
+        <label for="onoff" class="flex items-center cursor-pointer relative">
+            <input type="checkbox" id="onoff" class="sr-only" checked="true">
+            <div class="toggle-bg bg-gray-200 border-2 border-gray-200 h-6 w-11 rounded-full"></div>
+            <span class="ml-3 text-gray-900 text-sm font-medium">Turn on and off</span>
+        </label>
+    </div>
 
-    <input type="button" value="Waiting" id="onoff"></input>
-
-    <p class=" p-2 text-sm">
-        The promoted jobs are hiden. </br>
-    </p>
+    <!--     <input type="button" value="Waiting" id="onoff"></input>    -->
 
     <p id="mydebugger"></p>
-    <p class=" p-2 text-sm">
-        Note: Check supported languages in
-        <a href="https://github.com/canklot/Linkedin_Promoted_Hider" target="_blank">here</a>
+    <p class="p-2 text-sm">
+        <a href="https://github.com/canklot/Linkedin_Promoted_Hider" target="_blank">
+            Check supported languages on here
+        </a>
     </p>
 
     <script src="popup.js"></script>

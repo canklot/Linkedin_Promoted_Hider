@@ -11,14 +11,14 @@ function getElementsByXPath(xpath) {
     elements.push(node);
     node = query.iterateNext();
   }
-
   return elements;
 }
 
 function hideElement(element) { element.style.display = "none"; }
 
 function hidePromotedJobs(promotedText) {
-  if (onOffStatus === "off") {
+  if (onOffStatus == false) {
+    // maybe do === "false"
     return;
   }
 

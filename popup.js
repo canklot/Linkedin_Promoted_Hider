@@ -1,38 +1,30 @@
 const onOffButton = document.getElementById('onoff');
 
 function onoff() {
-    if (onOffButton.value == "off") {
-        onOffButton.value = "on";
-    }
-    else if (onOffButton.value == "on") {
-        onOffButton.value = "off";
-    }
-    chrome.storage.local.set({ isOn: onOffButton.value }).then(() => {
-        console.log("Value is set to " + onOffButton.value);
+    chrome.storage.local.set({ isOn: onOffButton.checked }).then(() => {
+        console.log("Value is set to " + onOffButton.checked);
     });
 }
 
 function checkIsOnUndefined() {
     chrome.storage.local.get(["isOn"]).then((result) => {
         if (result.isOn == undefined) {
-            chrome.storage.local.set({ isOn: "on" }).then(() => {
-                console.log("Value is set to " + "on");
+            chrome.storage.local.set({ isOn: true }).then(() => {
+                console.log("Undefined detected. Storage isOn is set to " + true);
             });
         }
     });
 }
 
-function updateButtontext() {
+function updateButtonState() {
     chrome.storage.local.get(["isOn"]).then((result) => {
-        onOffButton.value = result.isOn;
+        onOffButton.checked = result.isOn;
     });
 }
 
-
-(async () => {
-
+(function main() {
     checkIsOnUndefined();
-    updateButtontext();
+    updateButtonState();
     document.getElementById("onoff").addEventListener("click", onoff);
 
 })();
