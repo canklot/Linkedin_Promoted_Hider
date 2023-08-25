@@ -1,4 +1,6 @@
-let onOffStatus = "On";
+let onOffStatus;
+
+const otherLangsList = ["Promoted", "Öne çıkarılan içerik", "Anzeige", "Promocionado", "Sponsorisé"];
 
 function getElementsByXPath(xpath) {
   const elements = [];
@@ -15,10 +17,11 @@ function getElementsByXPath(xpath) {
 
 function hideElement(element) { element.style.display = "none"; }
 
-function hidePromotedJobs(promotedText){
-  if (onOffStatus==="Off"){
+function hidePromotedJobs(promotedText) {
+  if (onOffStatus === "off") {
     return;
   }
+
   //Template literals are literals delimited with backtick (`) characters, string interpolation with embedded expressions
   const promotedxpath = `//li[contains(. , '${promotedText}')]`
   //li[contains(.,'Promoted')]
@@ -26,39 +29,36 @@ function hidePromotedJobs(promotedText){
   elemets.forEach(hideElement);
 }
 
-const otherLangsList = ["Promoted","Öne çıkarılan içerik","Anzeige","Promocionado","Sponsorisé"];
+(function main() {
 
-MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+  chrome.storage.local.get(["isOn"]).then((result) => {
+    onOffStatus = result.isOn;
+  });
 
-var observer = new MutationObserver(function(mutations, observer) {
+  MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+  var observer = new MutationObserver(function (mutations, observer) {
     // fired when a mutation occurs
     otherLangsList.forEach(lang => {
       hidePromotedJobs(lang);
-    }); 
-});
+    });
+  });
 
-// define what element should be observed by the observer
-// and what types of mutations trigger the callback
-observer.observe(document, {
-  subtree: true,
-  attributes: true
-});
+  // define what element should be observed by the observer
+  // and what types of mutations trigger the callback
+  observer.observe(document, {
+    subtree: true,
+    attributes: true
+  });
 
-// Test messaging
-
-chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    console.log( "Contentscript recieved the on off status");
-    if (request.data === "On" || request.data === "Off"){
-      onOffStatus = request.data;
-      sendResponse({onOffStatus: "Contentscript recieved the on off status"});
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+      console.log(
+        `Storage key "${key}" in namespace "${namespace}" changed.`,
+        `Old value was "${oldValue}", new value is "${newValue}".`
+      );
+      onOffStatus = changes.isOn.newValue;
     }
-    else if(request.data==="getStatus")
-      sendResponse({data: onOffStatus});
-    else{
-      sendResponse({data: "Wrong parameter"});
-    }
-  }
-);
+  });
+})();
 
-console.log("content script counter");

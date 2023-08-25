@@ -1,36 +1,43 @@
-function onoff(){
-  const currentvalue = document.getElementById('onoff').value;
-  if(currentvalue == "Off"){
-    document.getElementById("onoff").value="On";
-  }else{
-    document.getElementById("onoff").value="Off";
-  }
-  updateContentScriptStatus();
+const onOffButton = document.getElementById('onoff');
+
+function onoff() {
+    if (onOffButton.value == "off") {
+        onOffButton.value = "on";
+    }
+    else if (onOffButton.value == "on") {
+        onOffButton.value = "off";
+    }
+    chrome.storage.local.set({ isOn: onOffButton.value }).then(() => {
+        console.log("Value is set to " + onOffButton.value);
+    });
 }
 
-async function updateContentScriptStatus()
-{
-    const currentvalue = document.getElementById('onoff').value;
-    const [tab] = await chrome.tabs.query({active: true, lastFocusedWindow: true});
-    const response = await chrome.tabs.sendMessage(tab.id, {data: currentvalue});
-    document.getElementById("mydebugger").innerText += "Popup.js send a message to active tab. \n"
-    document.getElementById("mydebugger").innerText += "Popup.js recived this response: "
-    document.getElementById("mydebugger").innerText += response.onOffStatus + "\n"
+function checkIsOnUndefined() {
+    chrome.storage.local.get(["isOn"]).then((result) => {
+        if (result.isOn == undefined) {
+            chrome.storage.local.set({ isOn: "on" }).then(() => {
+                console.log("Value is set to " + "on");
+            });
+        }
+    });
 }
 
-async function getStatusFromContentScript()
-{
-    const [tab] = await chrome.tabs.query({active: true, lastFocusedWindow: true});
-    const response = await chrome.tabs.sendMessage(tab.id, {data: "getStatus"});
-    return response.data;
+function updateButtontext() {
+    chrome.storage.local.get(["isOn"]).then((result) => {
+        onOffButton.value = result.isOn;
+    });
 }
 
 
-(async() => {
-    //await new Promise(r => setTimeout(r, 1000));
-    document.getElementById('onoff').value = await getStatusFromContentScript();
+(async () => {
+
+    checkIsOnUndefined();
+    updateButtontext();
     document.getElementById("onoff").addEventListener("click", onoff);
-  })();
+
+})();
 
 
 
+
+//await new Promise(r => setTimeout(r, 1000));
