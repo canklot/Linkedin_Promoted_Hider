@@ -6,7 +6,7 @@ function onoff() {
     });
 }
 
-function checkIsOnUndefined() {
+function checkStorageUndefined() {
     chrome.storage.local.get(["isOn"]).then((result) => {
         if (result.isOn == undefined) {
             chrome.storage.local.set({ isOn: true }).then(() => {
@@ -23,13 +23,8 @@ function updateButtonState() {
 }
 
 (function main() {
-    checkIsOnUndefined();
+    checkStorageUndefined();
     updateButtonState();
     document.getElementById("onoff").addEventListener("click", onoff);
 
 })();
-
-
-
-
-//await new Promise(r => setTimeout(r, 1000));
