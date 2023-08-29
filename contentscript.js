@@ -1,5 +1,5 @@
 let onOffStatus;
-
+let blockedJobCounter = 0;
 const otherLangsList = ["Promoted", "Öne çıkarılan içerik", "Anzeige", "Promocionado", "Sponsorisé"];
 
 function getElementsByXPath(xpath) {
@@ -14,19 +14,24 @@ function getElementsByXPath(xpath) {
   return elements;
 }
 
-function hideElement(element) { element.style.display = "none"; }
+function hideElement(element) {
+  element.style.display = "none";
+  blockedJobCounter++;
+  console.log(blockedJobCounter);
+}
 
 function hidePromotedJobs(promotedText) {
   if (onOffStatus == false) {
-    // maybe do === "false"
     return;
   }
 
-  //Template literals are literals delimited with backtick (`) characters, string interpolation with embedded expressions
-  const promotedxpath = `//li[contains(. , '${promotedText}')]`
-  //li[contains(.,'Promoted')]
-  const elemets = getElementsByXPath(promotedxpath);
-  elemets.forEach(hideElement);
+  // Uses template literals with backtick (`) characters to use string interpolation with embedded expressions
+  // Xpath for finding li elements with promoted text in all languages
+  // Discarding already hidden elemets
+  // Plain version for testing //li[contains(.,'Promoted') and not(contains(@style,'display: none'))]
+  const notHiddenPromotedXpath = `//li[contains(.,'${promotedText}') and not(contains(@style,'display: none'))]`
+  const elements = getElementsByXPath(notHiddenPromotedXpath);
+  elements.forEach(hideElement);
 }
 
 (function main() {

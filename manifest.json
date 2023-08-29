@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Linkedin Promoted Job Hider Extension",
-    "version": "1.2",
+    "version": "1.3",
     "description": "This extension hides promoted jobs postings on linkedin so you can focus on the jobs you are really interested.",
     "permissions": [
         "storage"
