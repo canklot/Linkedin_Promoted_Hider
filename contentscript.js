@@ -1,5 +1,5 @@
 let onOffStatus;
-let blockedJobCounter = 0;
+let hiddenJobCounter = 0;
 const otherLangsList = ["Promoted", "Öne çıkarılan içerik", "Anzeige", "Promocionado", "Sponsorisé"];
 
 function getElementsByXPath(xpath) {
@@ -16,8 +16,8 @@ function getElementsByXPath(xpath) {
 
 function hideElement(element) {
   element.style.display = "none";
-  blockedJobCounter++;
-  console.log(blockedJobCounter);
+  hiddenJobCounter++;
+  console.log(hiddenJobCounter);
 }
 
 function hidePromotedJobs(promotedText) {
@@ -32,6 +32,33 @@ function hidePromotedJobs(promotedText) {
   const notHiddenPromotedXpath = `//li[contains(.,'${promotedText}') and not(contains(@style,'display: none'))]`
   const elements = getElementsByXPath(notHiddenPromotedXpath);
   elements.forEach(hideElement);
+}
+
+function addStoreListenerForOnOff() {
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+      console.log(
+        `Storage key "${key}" in namespace "${namespace}" changed.`,
+        `Old value was "${oldValue}", new value is "${newValue}".`
+      );
+      onOffStatus = changes.isOn.newValue;
+    }
+  });
+}
+
+function addRuntimeListener() {
+  chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+      console.log("Contentscript recieved someting");
+      if (request.data === "getCount") {
+        sendResponse({ data: hiddenJobCounter });
+      }
+      else {
+        sendResponse({ data: "Wrong parameter" });
+      }
+    }
+  );
+
 }
 
 (function main() {
@@ -56,14 +83,7 @@ function hidePromotedJobs(promotedText) {
     attributes: true
   });
 
-  chrome.storage.onChanged.addListener((changes, namespace) => {
-    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-      console.log(
-        `Storage key "${key}" in namespace "${namespace}" changed.`,
-        `Old value was "${oldValue}", new value is "${newValue}".`
-      );
-      onOffStatus = changes.isOn.newValue;
-    }
-  });
+  addStoreListenerForOnOff();
+  addRuntimeListener();
 })();
 

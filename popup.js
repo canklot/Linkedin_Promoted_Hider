@@ -22,9 +22,16 @@ function updateButtonState() {
     });
 }
 
-(function main() {
+async function getHiddenCountFromContentScript() {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    const response = await chrome.tabs.sendMessage(tab.id, { data: "getCount" });
+    return response.data;
+}
+
+(async function main() {
     checkStorageUndefined();
     updateButtonState();
     document.getElementById("onoff").addEventListener("click", onoff);
+    document.getElementById("hidden-counter").innerText = await getHiddenCountFromContentScript();
 
 })();
