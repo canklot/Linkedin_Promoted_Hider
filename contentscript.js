@@ -86,7 +86,7 @@ function waitForElm(selector) {
   });
 }
 
-function getAllJobListing() {
+/* function getAllJobListing() {
   const xpathForJobListing = "//*[contains(@class, 'job-card-container--clickable')]";
   const jobListings = getElementsByXPath(xpathForJobListing);
   return jobListings;
@@ -97,7 +97,7 @@ function* clicker(jobListings) {
     element.click();
     yield;
   }
-}
+} */
 
 /* function filterJobsWithWord() {
   //const wordCheckXpath = "//*[contains(text(),'python')]"
@@ -122,13 +122,12 @@ function filterCurrentJob(textToHave) {
   const wordCheckXpath = `.//*[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),"${textToHave}")]`
   let jobDetailsNode = document.querySelector(jobDetailsCssSelector)
   let doeshaveText = getElementsByXPath(wordCheckXpath, jobDetailsNode);
+  // maybe add color selector for user
   if (doeshaveText.length === 0) {
-    jobDetailsNode.style.setProperty('background-color', 'red', 'important');
-
+    jobDetailsNode.firstElementChild.style.setProperty('background-color', 'red', 'important');
   }
   else if (doeshaveText.length > 0) {
-    jobDetailsNode.style.setProperty('background-color', 'green', 'important');
-
+    jobDetailsNode.firstElementChild.style.setProperty('background-color', 'green', 'important');
   }
 }
 
@@ -148,16 +147,15 @@ function setUpObservers() {
   });
 
   var jobDetailsObserver = new MutationObserver(function (mutations, observer) {
-    // code below fired when a mutation occurs
     filterCurrentJob("python");
   });
 
-  //let jobDetailsNode = document.querySelector(jobDetailsCssSelector)
   waitForElm(jobDetailsCssSelector).then((elm) => {
-    console.log('Element is ready');
     jobDetailsObserver.observe(elm, {
       subtree: true,
-      attributes: true
+      childList: true,
+      attributes: false,
+      characterData: true
     });
   });
 
