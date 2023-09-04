@@ -6,10 +6,11 @@ const jobDetailsCssSelector = "#job-details"
 // Add your translation of promoted to this list
 const otherLangsList = ["Promoted", "Öne çıkarılan içerik", "Anzeige", "Promocionado", "Sponsorisé"];
 
-function getElementsByXPath(xpath, baseNode = document) {
-  // I dont know how to use base node
+function getElementsByXPath(xpath, contextNode = document) {
+  // When using contextNode use .// selector. 
+  // Because even when you specify a context, the path is relative to the root for some reason
   const elements = [];
-  const query = document.evaluate(xpath, baseNode, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+  const query = document.evaluate(xpath, contextNode, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
   let node = query.iterateNext();
   while (node) {
@@ -122,10 +123,12 @@ function filterCurrentJob(textToHave) {
   let jobDetailsNode = document.querySelector(jobDetailsCssSelector)
   let doeshaveText = getElementsByXPath(wordCheckXpath, jobDetailsNode);
   if (doeshaveText.length === 0) {
-    jobDetailsNode.style.backgroundColor = "red";
+    jobDetailsNode.style.setProperty('background-color', 'red', 'important');
+
   }
   else if (doeshaveText.length > 0) {
-    jobDetailsNode.style.backgroundColor = "green";
+    jobDetailsNode.style.setProperty('background-color', 'green', 'important');
+
   }
 }
 
