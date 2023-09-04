@@ -1,10 +1,15 @@
 let onOffStatus;
 let hiddenJobCounter = 0;
+const jobDetailsXpath = "//*[@id='job-details']"
+const jobDetailsCssSelector = "#job-details"
+
+// Add your translation of promoted to this list
 const otherLangsList = ["Promoted", "Öne çıkarılan içerik", "Anzeige", "Promocionado", "Sponsorisé"];
 
-function getElementsByXPath(xpath) {
+function getElementsByXPath(xpath, baseNode = document) {
+  // I dont know how to use base node
   const elements = [];
-  const query = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+  const query = document.evaluate(xpath, baseNode, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 
   let node = query.iterateNext();
   while (node) {
@@ -27,7 +32,7 @@ function hidePromotedJobs(promotedText) {
 
   // Uses template literals with backtick (`) characters to use string interpolation with embedded expressions
   // Xpath for finding li elements with promoted text in all languages
-  // Discarding already hidden elemets
+  // Discarding already hidden elemets to prevent duplicate counting
   // Plain version for testing //li[contains(.,'Promoted') and not(contains(@style,'display: none'))]
   const notHiddenPromotedXpath = `//li[contains(.,'${promotedText}') and not(contains(@style,'display: none'))]`
   const elements = getElementsByXPath(notHiddenPromotedXpath);
@@ -58,19 +63,75 @@ function addRuntimeListener() {
       }
     }
   );
-
 }
 
-(function main() {
+function waitForElm(selector) {
+  return new Promise(resolve => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector));
+    }
 
-  chrome.storage.local.get(["isOn"]).then((result) => {
-    onOffStatus = result.isOn;
+    const observer = new MutationObserver(mutations => {
+      if (document.querySelector(selector)) {
+        observer.disconnect();
+        resolve(document.querySelector(selector));
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   });
+}
 
-  MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+function getAllJobListing() {
+  const xpathForJobListing = "//*[contains(@class, 'job-card-container--clickable')]";
+  const jobListings = getElementsByXPath(xpathForJobListing);
+  return jobListings;
+}
 
-  var observer = new MutationObserver(function (mutations, observer) {
-    // fired when a mutation occurs
+function* clicker(jobListings) {
+  for (let element in jobListings) {
+    element.click();
+    yield;
+  }
+}
+
+/* function filterJobsWithWord() {
+  //const wordCheckXpath = "//*[contains(text(),'python')]"
+  // xpath to check if given text exist. Uses translate for working case insensitive
+  const wordCheckXpath = "//text()[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'python')]"
+  const jobDetailsXpath = "//*[@id='job-details']"
+  let jobListings = getAllJobListing();
+  let jobIter = jobListings[Symbol.iterator]();
+  let clickme = jobIter.next();
+  while (!clickme.done) {
+
+    clickme.value.click();
+    let jobDescriptionNode = getElementsByXPath(jobDetailsXpath)[0];
+    let doeshaveText = getElementsByXPath(wordCheckXpath, jobDescriptionNode);
+    if (doeshaveText.length === 0) {
+      clickme.value.style.display = "none";
+    }
+  }
+} */
+
+function filterCurrentJob(textToHave) {
+  const wordCheckXpath = `.//*[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),"${textToHave}")]`
+  let jobDetailsNode = document.querySelector(jobDetailsCssSelector)
+  let doeshaveText = getElementsByXPath(wordCheckXpath, jobDetailsNode);
+  if (doeshaveText.length === 0) {
+    jobDetailsNode.style.backgroundColor = "red";
+  }
+  else if (doeshaveText.length > 0) {
+    jobDetailsNode.style.backgroundColor = "green";
+  }
+}
+
+function setUpObservers() {
+  var documentObserver = new MutationObserver(function (mutations, observer) {
+    // code below fired when a mutation occurs
     otherLangsList.forEach(lang => {
       hidePromotedJobs(lang);
     });
@@ -78,12 +139,35 @@ function addRuntimeListener() {
 
   // define what element should be observed by the observer
   // and what types of mutations trigger the callback
-  observer.observe(document, {
+  documentObserver.observe(document, {
     subtree: true,
     attributes: true
   });
 
+  var jobDetailsObserver = new MutationObserver(function (mutations, observer) {
+    // code below fired when a mutation occurs
+    filterCurrentJob("python");
+  });
+
+  //let jobDetailsNode = document.querySelector(jobDetailsCssSelector)
+  waitForElm(jobDetailsCssSelector).then((elm) => {
+    console.log('Element is ready');
+    jobDetailsObserver.observe(elm, {
+      subtree: true,
+      attributes: true
+    });
+  });
+
+}
+
+(function main() {
+  chrome.storage.local.get(["isOn"]).then((result) => {
+    onOffStatus = result.isOn;
+  });
+
+  setUpObservers();
   addStoreListenerForOnOff();
   addRuntimeListener();
+
 })();
 
