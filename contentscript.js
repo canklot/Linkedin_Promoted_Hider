@@ -25,7 +25,6 @@ function getElementsByXPath(xpath, contextNode = document) {
 function hideElement(element) {
   element.style.display = "none";
   hiddenJobCounter++;
-  console.log(hiddenJobCounter);
 }
 
 function hidePromotedJobs(promotedText) {
@@ -154,7 +153,15 @@ function colorCurrentJob(textToHave, clear = false) {
 
 }
 
-function setUpObservers() {
+function getKeywords() {
+  let url_string = window.location.href;
+  let url = new URL(url_string);
+  let keywords = url.searchParams.get("keywords");
+  console.log(keywords);
+  return keywords;
+}
+
+function setUpObservers(keywords) {
   documentObserver = new MutationObserver(function (mutations, observer) {
     // code below fired when a mutation occurs
     otherLangsList.forEach(lang => {
@@ -163,7 +170,7 @@ function setUpObservers() {
   });
 
   jobDetailsObserver = new MutationObserver(function (mutations, observer) {
-    colorCurrentJob("python");
+    colorCurrentJob(keywords);
   });
 
   startObservers();
@@ -201,7 +208,8 @@ function startObservers() {
     jobDetailsCssSelector = "#job-details";
   }
 
-  setUpObservers();
+
+  setUpObservers(getKeywords());
   addStoreListenerForOnOff();
   addRuntimeListener();
 
