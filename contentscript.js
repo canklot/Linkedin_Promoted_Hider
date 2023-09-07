@@ -5,6 +5,7 @@ let documentObserver;
 let urlObserver;
 //const jobDetailsXpath = "//*[@id='job-details']"
 let jobDetailsCssSelector;
+const keywordsStorageStr = "keywordsStorage";
 
 // Add your translation of promoted to this list
 const otherLangsList = [
@@ -41,14 +42,6 @@ function hideElement(element) {
 }
 
 function hidePromotedJobs(promotedText) {
-  /* if (onOffStatus == false) {
-    return;
-  } */
-
-  // Uses template literals with backtick (`) characters to use string interpolation with embedded expressions
-  // Xpath for finding li elements with promoted text in all languages
-  // Discarding already hidden elemets to prevent duplicate counting
-  // Plain version for testing //li[contains(.,'Promoted') and not(contains(@style,'display: none'))]
   const notHiddenPromotedXpath = `//li[contains(.,'${promotedText}') and not(contains(@style,'display: none'))]`;
   const elements = getElementsByXPath(notHiddenPromotedXpath);
   elements.forEach(hideElement);
@@ -61,16 +54,26 @@ function addStoreListenerForOnOff() {
         `Storage key "${key}" in namespace "${namespace}" changed.`,
         `Old value was "${oldValue}", new value is "${newValue}".`
       );
-      if (Object.hasOwn(result, "isOn")) {
+      if (Object.hasOwn(changes, "isOn")) {
         onOffStatus = changes.isOn.newValue;
         if (onOffStatus === true) {
-          startObservers();
+          startDocumentObserver();
+          startJobObserver();
         } else {
+          console.log("disconnect");
           jobDetailsObserver.disconnect();
           documentObserver.disconnect();
           colorCurrentJob("", (clear = true));
         }
       }
+    }
+  });
+}
+
+function getOnOffStorage() {
+  chrome.storage.local.get(["isOn"]).then((result) => {
+    if (Object.hasOwn(result, "onOffStatus")) {
+      onOffStatus = result.isOn;
     }
   });
 }
@@ -91,6 +94,7 @@ function addRuntimeListener() {
 }
 
 function waitForElm(selector) {
+  console.log("waiting for element");
   return new Promise((resolve) => {
     if (document.querySelector(selector)) {
       return resolve(document.querySelector(selector));
@@ -126,38 +130,6 @@ function mobileCheck() {
   return check;
 }
 
-/* function getAllJobListing() {
-  const xpathForJobListing = "//*[contains(@class, 'job-card-container--clickable')]";
-  const jobListings = getElementsByXPath(xpathForJobListing);
-  return jobListings;
-}
-
-function* clicker(jobListings) {
-  for (let element in jobListings) {
-    element.click();
-    yield;
-  }
-} */
-
-/* function filterJobsWithWord() {
-  //const wordCheckXpath = "//*[contains(text(),'python')]"
-  // xpath to check if given text exist. Uses translate for working case insensitive
-  const wordCheckXpath = "//text()[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'python')]"
-  const jobDetailsXpath = "//*[@id='job-details']"
-  let jobListings = getAllJobListing();
-  let jobIter = jobListings[Symbol.iterator]();
-  let clickme = jobIter.next();
-  while (!clickme.done) {
-
-    clickme.value.click();
-    let jobDescriptionNode = getElementsByXPath(jobDetailsXpath)[0];
-    let doeshaveText = getElementsByXPath(wordCheckXpath, jobDescriptionNode);
-    if (doeshaveText.length === 0) {
-      clickme.value.style.display = "none";
-    }
-  }
-} */
-
 function colorCurrentJob(textToHave, clear = false) {
   const wordCheckXpath = `.//*[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),"${textToHave}")]`;
   let jobDetailsNode = document.querySelector(jobDetailsCssSelector);
@@ -167,7 +139,7 @@ function colorCurrentJob(textToHave, clear = false) {
     jobDetailsNode.firstElementChild.style.removeProperty("background-color");
     return;
   }
-  // maybe add color selector for user
+
   if (doeshaveText.length === 0) {
     jobDetailsNode.firstElementChild.style.setProperty(
       "background-color",
@@ -183,13 +155,23 @@ function colorCurrentJob(textToHave, clear = false) {
   }
 }
 
-/* function getKeywords() {
-  let url_string = window.location.href;
-  let url = new URL(url_string);
-  let keywords = url.searchParams.get("keywords");
-  console.log(keywords);
-  return keywords;
-} */
+function setStoreKeywords() {
+  const mobileParam = "keyword";
+  const desktopParam = "keywords";
+  let searchParams = new URLSearchParams(document.location.search);
+
+  if (searchParams.has(desktopParam) === true) {
+    keywords = searchParams.get(desktopParam);
+    chrome.storage.local.set({ keywordsStorage: keywords }).then(() => {
+      console.log("Keywords are " + keywords);
+    });
+  } else if (searchParams.has(mobileParam) === true) {
+    keywords = searchParams.get(mobileParam);
+    chrome.storage.local.set({ keywordsStorage: keywords }).then(() => {
+      console.log("Keywords are " + keywords);
+    });
+  }
+}
 
 function setupUrlObserver() {
   let previousUrl = "";
@@ -197,25 +179,14 @@ function setupUrlObserver() {
     if (location.href !== previousUrl) {
       previousUrl = location.href;
       console.log(`URL changed to ${location.href}`);
-      let searchParams = new URLSearchParams(document.location.search);
-      if (searchParams.has("keywords") === true) {
-        keywords = searchParams.get("keywords");
-        chrome.storage.local.set({ keywordsStorage: keywords }).then(() => {
-          console.log("Keywords are " + keywords);
-        });
-      } else if (searchParams.has("keyword") === true) {
-        // on mobile the url param is keyword.
-        keywords = searchParams.get("keyword");
-        chrome.storage.local.set({ keywordsStorage: keywords }).then(() => {
-          console.log("Keywords are " + keywords);
-        });
-      }
+      setStoreKeywords();
+      startJobObserver();
     }
   });
-
   urlObserver.observe(document, { subtree: true, childList: true });
 }
-function setUpObservers(keywords) {
+
+function setUpDocumentObserver() {
   documentObserver = new MutationObserver(function (mutations, observer) {
     // code below fired when a mutation occurs
     otherLangsList.forEach((lang) => {
@@ -223,52 +194,43 @@ function setUpObservers(keywords) {
       console.log("no more hide for debug");
     });
   });
-
+}
+function setUpJobObserver(keywords) {
   jobDetailsObserver = new MutationObserver(function (mutations, observer) {
     colorCurrentJob(keywords);
   });
-  startObservers();
 }
 
-function startObservers() {
-  // define what element should be observed by the observer
-  // and what types of mutations trigger the callback
-
-  documentObserver.observe(document, { subtree: true, attributes: true });
-
+function startJobObserver() {
   waitForElm(jobDetailsCssSelector).then((elm) => {
     jobDetailsObserver.observe(elm, {
       subtree: true,
       childList: true,
-      attributes: false,
       characterData: true,
     });
   });
 }
+function startDocumentObserver() {
+  documentObserver.observe(document, { subtree: true, attributes: true });
+}
 
 (function main() {
-  chrome.storage.local.get(["isOn"]).then((result) => {
-    if (Object.hasOwn(result, "onOffStatus")) {
-      onOffStatus = result.isOn;
-    }
-  });
-
-  console.log("is mobile " + mobileCheck());
+  getOnOffStorage();
   if (mobileCheck()) {
     jobDetailsCssSelector = ".job-description";
   } else {
     jobDetailsCssSelector = "#job-details";
   }
-
   setupUrlObserver();
-  //put keywordsStorage name in a variable
-  chrome.storage.local.get(["keywordsStorage"]).then((result) => {
-    if (Object.hasOwn(result, "keywordsStorage")) {
+  chrome.storage.local.get([keywordsStorageStr]).then((result) => {
+    if (Object.hasOwn(result, keywordsStorageStr)) {
       // if search has quotas it causes bug sanitize keywords
-      setUpObservers(result.keywordsStorage);
+      setUpDocumentObserver();
+      setUpJobObserver(result.keywordsStorage);
+      startDocumentObserver();
+      startJobObserver();
     }
   });
-
   addStoreListenerForOnOff();
   addRuntimeListener();
 })();
