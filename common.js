@@ -1,3 +1,4 @@
+"use strict";
 export const otherLangsList = [
     // Add your translation of promoted to this list
     "Promoted",
@@ -36,12 +37,14 @@ export function waitForElm(selector) {
     console.log("waiting for element");
     return new Promise((resolve) => {
         if (document.querySelector(selector)) {
+            console.log("already exists");
             return resolve(document.querySelector(selector));
         }
 
         const observer = new MutationObserver((mutations) => {
             if (document.querySelector(selector)) {
                 observer.disconnect();
+                console.log("waiting finished");
                 resolve(document.querySelector(selector));
             }
         });

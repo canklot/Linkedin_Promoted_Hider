@@ -32,6 +32,6 @@ async function getHiddenCountFromContentScript() {
     checkStorageUndefined();
     updateButtonState();
     document.getElementById("onoff").addEventListener("click", onoff);
-    document.getElementById("hidden-counter").innerText = await getHiddenCountFromContentScript();
+    //document.getElementById("hidden-counter").innerText = await getHiddenCountFromContentScript();
 
 })();

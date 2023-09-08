@@ -1,3 +1,4 @@
+"use strict";
 export function hidePromotedJobs(promotedText) {
   const notHiddenPromotedXpath = `//li[contains(.,'${promotedText}') and not(contains(@style,'display: none'))]`;
   const elements = commonJs.getElementsByXPath(notHiddenPromotedXpath);
