@@ -55,6 +55,8 @@ async function setUpJobObserver() {
   jobDetailsObserver = new MutationObserver(colorCurrentJob);
 
   let jobDetailsNode = await commonJs.waitForElm(jobDetailsCssSelector)
+
+  colorCurrentJob();
   jobDetailsObserver.observe(jobDetailsNode, {
     subtree: true,
     childList: true,
