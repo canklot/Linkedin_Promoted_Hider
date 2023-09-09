@@ -6,6 +6,7 @@ let urlObserver;
 let commonJs;
 let jobDetailsCssSelector;
 let colorJs;
+let jobTitleSelector;
 const keywordsStorageStr = "keywordsStorage";
 const isOnStorageStr = "isOn"
 
@@ -32,13 +33,13 @@ async function colorCurrentJob() {
   );
 
   if (doeshaveText.length === 0) {
-    jobDetailsNode.firstElementChild.style.setProperty(
+    document.querySelector(jobTitleSelector).style.setProperty(
       "background-color",
       "red",
       "important"
     );
   } else if (doeshaveText.length > 0) {
-    jobDetailsNode.firstElementChild.style.setProperty(
+    document.querySelector(jobTitleSelector).style.setProperty(
       "background-color",
       "green",
       "important"
@@ -116,6 +117,17 @@ async function getOnOffStorage() {
     return result.isOn;
   }
 }
+function setCssSelector() {
+  if (commonJs.mobileCheck()) {
+    jobDetailsCssSelector = ".job-description";
+    jobTitleSelector = '[class="position-overview"] dt'
+
+  } else {
+    jobDetailsCssSelector = "#job-details";
+    jobTitleSelector = '[class*="jobs-unified-top-card__job-title"]'
+
+  }
+}
 
 (async function main() {
   const srcCommon = chrome.runtime.getURL("./common.js");
@@ -123,11 +135,7 @@ async function getOnOffStorage() {
 
   addStoreListenerForOnOff();
 
-  if (commonJs.mobileCheck()) {
-    jobDetailsCssSelector = ".job-description";
-  } else {
-    jobDetailsCssSelector = "#job-details";
-  }
+  setCssSelector();
 
   setupUrlObserver();
 

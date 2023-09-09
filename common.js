@@ -11,6 +11,7 @@ export const otherLangsList = [
 export function getElementsByXPath(xpath, contextNode = document) {
     // When using contextNode use .// selector.
     // Because even when you specify a context, the path is relative to the root for some reason
+    // Maybe I can replace this with css seletors and querySelector https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors
     const elements = [];
     const query = document.evaluate(
         xpath,
