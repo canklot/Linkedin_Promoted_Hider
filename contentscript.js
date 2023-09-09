@@ -11,8 +11,8 @@ const isOnStorageStr = "isOn"
 
 async function colorCurrentJob() {
 
-  let isexton = await getOnOffStorage();
-  if (!isexton) {//shorten me later
+  let isExtensionOn = await getOnOffStorage();
+  if (!isExtensionOn) {
     console.log("extension is off");
     return;
   }
@@ -21,9 +21,9 @@ async function colorCurrentJob() {
   let result = await chrome.storage.local.get([keywordsStorageStr]);
   if (Object.hasOwn(result, keywordsStorageStr)) {
     // if search has quotas it causes bug sanitize keywords
-    keywords = result[keywordsStorageStr];
+    keywords = result[keywordsStorageStr].toLowerCase();
   }
-
+  console.log(keywords);
   const wordCheckXpath = `.//*[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),"${keywords}")]`;
   let jobDetailsNode = document.querySelector(jobDetailsCssSelector);
   let doeshaveText = commonJs.getElementsByXPath(
