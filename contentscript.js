@@ -8,10 +8,9 @@ let jobDetailsCssSelector;
 let colorJs;
 let jobTitleSelector;
 const keywordsStorageStr = "keywordsStorage";
-const isOnStorageStr = "isOn"
+const isOnStorageStr = "isOn";
 
 async function colorCurrentJob() {
-
   let isExtensionOn = await getOnOffStorage();
   if (!isExtensionOn) {
     console.log("extension is off");
@@ -34,20 +33,15 @@ async function colorCurrentJob() {
   );
 
   if (doeshaveText.length === 0) {
-    document.querySelector(jobTitleSelector).style.setProperty(
-      "background-color",
-      "red",
-      "important"
-    );
+    document
+      .querySelector(jobTitleSelector)
+      .style.setProperty("background-color", "red", "important");
   } else if (doeshaveText.length > 0) {
-    document.querySelector(jobTitleSelector).style.setProperty(
-      "background-color",
-      "green",
-      "important"
-    );
+    document
+      .querySelector(jobTitleSelector)
+      .style.setProperty("background-color", "green", "important");
   }
 }
-
 
 function clearCurrentJob() {
   let jobDetailsNode = document.querySelector(jobDetailsCssSelector);
@@ -55,9 +49,14 @@ function clearCurrentJob() {
 }
 
 async function setUpJobObserver() {
+  // Cant just use UrlObserver to call colorCurrentJob() bacause on desktop version jobdetail loads asynchronously
+  // Generally a few cycles after url changes
   jobDetailsObserver = new MutationObserver(colorCurrentJob);
-  let jobDetailsNode = await commonJs.waitForElm(jobDetailsCssSelector)
-  colorCurrentJob(); // Why call this function here?
+  let jobDetailsNode = await commonJs.waitForElm(jobDetailsCssSelector);
+  // Because JobDeails node is static in mobile version and page navigation causes a full page load
+  // it causes JobDetailsObserver to loose its data and not fire.
+  // Because of that colorCurrentJob() need to be called manually.
+  colorCurrentJob();
 
   jobDetailsObserver.observe(jobDetailsNode, {
     subtree: true,
@@ -89,7 +88,6 @@ function setupUrlObserver() {
       saveKeywordsToLocalStorage();
       // When navigating to another page from jobs page jobs node element deleted causing observerto not work anymore. I migh have fixed this.
       setUpJobObserver();
-
     }
   });
   urlObserver.observe(document, { subtree: true, childList: true });
@@ -97,7 +95,6 @@ function setupUrlObserver() {
 
 function ClearColorWhenTurnedOff() {
   chrome.storage.onChanged.addListener((changes, namespace) => {
-
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
       console.log(
         `Storage key "${key}" in namespace "${namespace}" changed.`,
@@ -109,46 +106,37 @@ function ClearColorWhenTurnedOff() {
           clearCurrentJob();
         }
       }
-
     }
   });
 }
 
 async function getOnOffStorage() {
-  let result = await chrome.storage.local.get([isOnStorageStr])
+  let result = await chrome.storage.local.get([isOnStorageStr]);
 
   if (result.isOn == undefined) {
-    await chrome.storage.local.set({ [isOnStorageStr]: true })
+    await chrome.storage.local.set({ [isOnStorageStr]: true });
     console.log("Undefined detected. Storage isOn is set to " + true);
-    result = await chrome.storage.local.get([isOnStorageStr])
+    result = await chrome.storage.local.get([isOnStorageStr]);
   }
 
   if (Object.hasOwn(result, isOnStorageStr)) {
     return result.isOn;
   }
-
 }
 function setCssSelector() {
   if (commonJs.mobileCheck()) {
     jobDetailsCssSelector = ".job-description";
-    jobTitleSelector = '[class="position-overview"] dt'
-
+    jobTitleSelector = '[class="position-overview"] dt';
   } else {
     jobDetailsCssSelector = "#job-details";
-    jobTitleSelector = '[class*="jobs-unified-top-card__job-title"]'
-
+    jobTitleSelector = '[class*="jobs-unified-top-card__job-title"]';
   }
 }
 
 (async function main() {
   const srcCommon = chrome.runtime.getURL("./common.js");
   commonJs = await import(srcCommon);
-
   ClearColorWhenTurnedOff();
-
   setCssSelector();
-
   setupUrlObserver();
-
-
 })();
