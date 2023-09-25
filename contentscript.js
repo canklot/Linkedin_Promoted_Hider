@@ -7,8 +7,8 @@ let commonJs;
 let jobDetailsCssSelector;
 let colorJs;
 let jobTitleSelector;
-const keywordsStorageStr = "keywordsStorage";
-const isOnStorageStr = "isOn";
+const keywordsKey = "keywords";
+const onOffKey = "isOn";
 
 async function colorCurrentJob() {
   let isExtensionOn = await getOnOffStorage();
@@ -18,10 +18,10 @@ async function colorCurrentJob() {
   }
 
   let keywords;
-  let result = await chrome.storage.local.get([keywordsStorageStr]);
-  if (Object.hasOwn(result, keywordsStorageStr)) {
+  let result = await chrome.storage.local.get([keywordsKey]);
+  if (Object.hasOwn(result, keywordsKey)) {
     // if search has quotas it causes bug sanitize keywords
-    keywords = result[keywordsStorageStr].toLowerCase();
+    keywords = result[keywordsKey].toLowerCase();
   }
   console.log(keywords);
   const wordCheckXpath = `.//*[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),"${keywords}")]`;
@@ -72,10 +72,10 @@ function saveKeywordsToLocalStorage() {
 
   if (searchParams.has(desktopParam)) {
     let keywords = searchParams.get(desktopParam);
-    chrome.storage.local.set({ [keywordsStorageStr]: keywords });
+    chrome.storage.local.set({ [keywordsKey]: keywords });
   } else if (searchParams.has(mobileParam)) {
     let keywords = searchParams.get(mobileParam);
-    chrome.storage.local.set({ [keywordsStorageStr]: keywords });
+    chrome.storage.local.set({ [keywordsKey]: keywords });
   }
 }
 
@@ -101,7 +101,7 @@ function ClearColorWhenTurnedOff() {
         `Old value was "${oldValue}", new value is "${newValue}".`
       );
 
-      if (Object.hasOwn(changes, isOnStorageStr)) {
+      if (Object.hasOwn(changes, onOffKey)) {
         if (changes.isOn.newValue === false) {
           clearCurrentJob();
         }
@@ -111,15 +111,15 @@ function ClearColorWhenTurnedOff() {
 }
 
 async function getOnOffStorage() {
-  let result = await chrome.storage.local.get([isOnStorageStr]);
+  let result = await chrome.storage.local.get([onOffKey]);
 
   if (result.isOn == undefined) {
-    await chrome.storage.local.set({ [isOnStorageStr]: true });
+    await chrome.storage.local.set({ [onOffKey]: true });
     console.log("Undefined detected. Storage isOn is set to " + true);
-    result = await chrome.storage.local.get([isOnStorageStr]);
+    result = await chrome.storage.local.get([onOffKey]);
   }
 
-  if (Object.hasOwn(result, isOnStorageStr)) {
+  if (Object.hasOwn(result, onOffKey)) {
     return result.isOn;
   }
 }
