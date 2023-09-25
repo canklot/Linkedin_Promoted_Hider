@@ -1,23 +1,15 @@
-const onOffButton = document.getElementById('onoff');
+const onOffButton = document.getElementById("onoff");
+const onOffKey = "isOn";
 
 function onoff() {
-    chrome.storage.local.set({ isOn: onOffButton.checked }).then(() => {
+    chrome.storage.local.set({ [onOffKey]: onOffButton.checked }).then(() => {
         console.log("Value is set to " + onOffButton.checked);
     });
 }
 
-function checkStorageUndefined() {
-    chrome.storage.local.get(["isOn"]).then((result) => {
-        if (result.isOn == undefined) {
-            chrome.storage.local.set({ isOn: true }).then(() => {
-                console.log("Undefined detected. Storage isOn is set to " + true);
-            });
-        }
-    });
-}
 
 function updateButtonState() {
-    chrome.storage.local.get(["isOn"]).then((result) => {
+    chrome.storage.local.get([onOffKey]).then((result) => {
         onOffButton.checked = result.isOn;
     });
 }
@@ -29,9 +21,8 @@ async function getHiddenCountFromContentScript() {
 }
 
 (async function main() {
-    checkStorageUndefined();
     updateButtonState();
-    document.getElementById("onoff").addEventListener("click", onoff);
+    onOffButton.addEventListener("click", onoff);
     //document.getElementById("hidden-counter").innerText = await getHiddenCountFromContentScript();
 
 })();

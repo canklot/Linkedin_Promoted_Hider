@@ -26,6 +26,7 @@ async function colorCurrentJob() {
   }
   console.log(keywords);
   const wordCheckXpath = `.//*[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),"${keywords}")]`;
+  // maybe I can recursivly check if node and childs have text
   let jobDetailsNode = document.querySelector(jobDetailsCssSelector);
   let doeshaveText = commonJs.getElementsByXPath(
     wordCheckXpath,
@@ -47,6 +48,7 @@ async function colorCurrentJob() {
   }
 }
 
+
 function clearCurrentJob() {
   let jobDetailsNode = document.querySelector(jobDetailsCssSelector);
   jobDetailsNode.firstElementChild.style.removeProperty("background-color");
@@ -54,10 +56,9 @@ function clearCurrentJob() {
 
 async function setUpJobObserver() {
   jobDetailsObserver = new MutationObserver(colorCurrentJob);
-
   let jobDetailsNode = await commonJs.waitForElm(jobDetailsCssSelector)
+  colorCurrentJob(); // Why call this function here?
 
-  colorCurrentJob();
   jobDetailsObserver.observe(jobDetailsNode, {
     subtree: true,
     childList: true,
@@ -65,18 +66,17 @@ async function setUpJobObserver() {
   });
 }
 
-function setStorageKeywords() {
+function saveKeywordsToLocalStorage() {
   const mobileParam = "keyword";
   const desktopParam = "keywords";
-  let keywords;
   let searchParams = new URLSearchParams(document.location.search);
 
   if (searchParams.has(desktopParam)) {
-    keywords = searchParams.get(desktopParam);
-    chrome.storage.local.set({ keywordsStorage: keywords });
+    let keywords = searchParams.get(desktopParam);
+    chrome.storage.local.set({ [keywordsStorageStr]: keywords });
   } else if (searchParams.has(mobileParam)) {
-    keywords = searchParams.get(mobileParam);
-    chrome.storage.local.set({ keywordsStorage: keywords });
+    let keywords = searchParams.get(mobileParam);
+    chrome.storage.local.set({ [keywordsStorageStr]: keywords });
   }
 }
 
@@ -86,8 +86,8 @@ function setupUrlObserver() {
     if (location.href !== previousUrl) {
       previousUrl = location.href;
       console.log(`URL changed to ${location.href}`);
-      setStorageKeywords();
-      // When navigating to another page from jobs page jobs node element deleted causing observerto not work anymore.
+      saveKeywordsToLocalStorage();
+      // When navigating to another page from jobs page jobs node element deleted causing observerto not work anymore. I migh have fixed this.
       setUpJobObserver();
 
     }
@@ -95,27 +95,38 @@ function setupUrlObserver() {
   urlObserver.observe(document, { subtree: true, childList: true });
 }
 
-function addStoreListenerForOnOff() {
+function ClearColorWhenTurnedOff() {
   chrome.storage.onChanged.addListener((changes, namespace) => {
+
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
       console.log(
         `Storage key "${key}" in namespace "${namespace}" changed.`,
         `Old value was "${oldValue}", new value is "${newValue}".`
       );
+
       if (Object.hasOwn(changes, isOnStorageStr)) {
         if (changes.isOn.newValue === false) {
           clearCurrentJob();
         }
       }
+
     }
   });
 }
 
 async function getOnOffStorage() {
   let result = await chrome.storage.local.get([isOnStorageStr])
+
+  if (result.isOn == undefined) {
+    await chrome.storage.local.set({ [isOnStorageStr]: true })
+    console.log("Undefined detected. Storage isOn is set to " + true);
+    result = await chrome.storage.local.get([isOnStorageStr])
+  }
+
   if (Object.hasOwn(result, isOnStorageStr)) {
     return result.isOn;
   }
+
 }
 function setCssSelector() {
   if (commonJs.mobileCheck()) {
@@ -133,7 +144,7 @@ function setCssSelector() {
   const srcCommon = chrome.runtime.getURL("./common.js");
   commonJs = await import(srcCommon);
 
-  addStoreListenerForOnOff();
+  ClearColorWhenTurnedOff();
 
   setCssSelector();
 
