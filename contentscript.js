@@ -8,7 +8,6 @@ let jobDetailsCssSelector;
 let colorJs;
 let jobTitleSelector;
 const keywordsKey = "keywords";
-const onOffKey = "isOn";
 
 async function colorCurrentJob() {
   let isExtensionOn = await getOnOffStorage();
@@ -44,8 +43,8 @@ async function colorCurrentJob() {
 }
 
 function clearCurrentJob() {
-  let jobDetailsNode = document.querySelector(jobDetailsCssSelector);
-  jobDetailsNode.firstElementChild.style.removeProperty("background-color");
+  let jobTitleNode = document.querySelector(jobTitleSelector);
+  jobTitleNode.style.removeProperty("background-color");
 }
 
 async function setUpJobObserver() {
@@ -101,8 +100,8 @@ function ClearColorWhenTurnedOff() {
         `Old value was "${oldValue}", new value is "${newValue}".`
       );
 
-      if (Object.hasOwn(changes, onOffKey)) {
-        if (changes.isOn.newValue === false) {
+      if (Object.hasOwn(changes, commonJs.colorJobsOnOffKey)) {
+        if (changes[commonJs.colorJobsOnOffKey].newValue === false) {
           clearCurrentJob();
         }
       }
@@ -111,16 +110,16 @@ function ClearColorWhenTurnedOff() {
 }
 
 async function getOnOffStorage() {
-  let result = await chrome.storage.local.get([onOffKey]);
+  let result = await chrome.storage.local.get([commonJs.colorJobsOnOffKey]);
 
-  if (result.isOn == undefined) {
-    await chrome.storage.local.set({ [onOffKey]: true });
-    console.log("Undefined detected. Storage isOn is set to " + true);
-    result = await chrome.storage.local.get([onOffKey]);
+  if (result[commonJs.colorJobsOnOffKey] == undefined) {
+    await chrome.storage.local.set({ [commonJs.colorJobsOnOffKey]: true });
+    console.log("Undefined detected. Storage commonJs.colorJobsOnOffKey is set to " + true);
+    result = await chrome.storage.local.get([commonJs.colorJobsOnOffKey]);
   }
 
-  if (Object.hasOwn(result, onOffKey)) {
-    return result.isOn;
+  if (Object.hasOwn(result, commonJs.colorJobsOnOffKey)) {
+    return result[commonJs.colorJobsOnOffKey];
   }
 }
 function setCssSelector() {
@@ -135,8 +134,16 @@ function setCssSelector() {
 
 (async function main() {
   const srcCommon = chrome.runtime.getURL("./common.js");
+  const srcPromoted = chrome.runtime.getURL("./promoted.js");
+
   commonJs = await import(srcCommon);
+  promotedjs = await import(srcPromoted);
+
+
   ClearColorWhenTurnedOff();
   setCssSelector();
   setupUrlObserver();
+  promotedjs.setUpDocumentObserver();
+  promotedjs.startDocumentObserver();
+  promotedjs.addRuntimeListener();
 })();

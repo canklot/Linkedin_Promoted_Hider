@@ -1,16 +1,24 @@
-const onOffButton = document.getElementById("onoff");
-const onOffKey = "isOn";
+const colorJobsOnOffButton = document.getElementById("color-jobs-on-off");
+const promotedHiderOnOffButton = document.getElementById("promoted-hider-on-off");
 
-function onoff() {
-    chrome.storage.local.set({ [onOffKey]: onOffButton.checked }).then(() => {
-        console.log("Value is set to " + onOffButton.checked);
+function colorJobsOnOffToggle() {
+    chrome.storage.local.set({ [commonJs.colorJobsOnOffKey]: colorJobsOnOffButton.checked }).then(() => {
+        console.log("Value is set to " + colorJobsOnOffButton.checked);
     });
 }
 
+function promotedHiderOnOffToggle() {
+    chrome.storage.local.set({ [commonJs.promotedHiderOnOffKey]: promotedHiderOnOffButton.checked }).then(() => {
+        console.log("Value is set to " + promotedHiderOnOffButton.checked);
+    });
+}
 
 function updateButtonState() {
-    chrome.storage.local.get([onOffKey]).then((result) => {
-        onOffButton.checked = result.isOn;
+    chrome.storage.local.get([commonJs.colorJobsOnOffKey]).then((result) => {
+        colorJobsOnOffButton.checked = result[commonJs.colorJobsOnOffKey];
+    });
+    chrome.storage.local.get([commonJs.promotedHiderOnOffKey]).then((result) => {
+        promotedHiderOnOffButton.checked = result[commonJs.promotedHiderOnOffKey];
     });
 }
 
@@ -21,8 +29,14 @@ async function getHiddenCountFromContentScript() {
 }
 
 (async function main() {
+    const srcCommon = chrome.runtime.getURL("./common.js");
+    commonJs = await import(srcCommon);
+
+
     updateButtonState();
-    onOffButton.addEventListener("click", onoff);
+    colorJobsOnOffButton.addEventListener("click", colorJobsOnOffToggle);
+    colorJobsOnOffButton.addEventListener("click", promotedHiderOnOffToggle);
+
     //document.getElementById("hidden-counter").innerText = await getHiddenCountFromContentScript();
 
 })();

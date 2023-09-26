@@ -7,6 +7,8 @@ export const otherLangsList = [
     "Promocionado",
     "Sponsorisé",
 ];
+export const colorJobsOnOffKey = "colorJobsOnOff";
+export const promotedHiderOnOffKey = "promotedHiderOnOff";
 
 export function getElementsByXPath(xpath, contextNode = document) {
     // When using contextNode use .// selector.
