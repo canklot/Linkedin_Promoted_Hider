@@ -19,7 +19,7 @@
     ],
     "web_accessible_resources": [{
         "matches": ["https://www.linkedin.com/*"],
-        "resources": ["common.js","promoted.js","color.js","popup.js"]
+        "resources": ["common.js","promoted.js","color.js"]
       }],
     "host_permissions": [
         "https://www.linkedin.com/*"

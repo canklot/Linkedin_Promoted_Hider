@@ -10,9 +10,9 @@ let jobTitleSelector;
 const keywordsKey = "keywords";
 
 async function colorCurrentJob() {
-  let isExtensionOn = await getOnOffStorage();
-  if (!isExtensionOn) {
-    console.log("extension is off");
+  let ColorJobsOnOffStatus = await getColorJobsOnOffStatus();
+  if (!ColorJobsOnOffStatus) {
+    console.log("Job painter is off");
     return;
   }
 
@@ -109,7 +109,7 @@ function ClearColorWhenTurnedOff() {
   });
 }
 
-async function getOnOffStorage() {
+async function getColorJobsOnOffStatus() {
   let result = await chrome.storage.local.get([commonJs.colorJobsOnOffKey]);
 
   if (result[commonJs.colorJobsOnOffKey] == undefined) {
@@ -122,6 +122,7 @@ async function getOnOffStorage() {
     return result[commonJs.colorJobsOnOffKey];
   }
 }
+
 function setCssSelector() {
   if (commonJs.mobileCheck()) {
     jobDetailsCssSelector = ".job-description";
