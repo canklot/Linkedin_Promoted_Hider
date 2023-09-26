@@ -37,6 +37,6 @@ async function getHiddenCountFromContentScript() {
     colorJobsOnOffButton.addEventListener("click", colorJobsOnOffToggle);
     promotedHiderOnOffButton.addEventListener("click", promotedHiderOnOffToggle);
 
-    //document.getElementById("hidden-counter").innerText = await getHiddenCountFromContentScript();
+    document.getElementById("hidden-counter").innerText = await getHiddenCountFromContentScript();
 
 })();
