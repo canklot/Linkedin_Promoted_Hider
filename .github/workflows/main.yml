@@ -18,7 +18,7 @@ jobs:
         run: npm install
 
       - name: Build zip file
-        run: npm run build
+        run: zip -r LinkedinExtension.zip .
 
       - name: Upload to Chrome Web Store
         uses: mobilefirstllc/cws-publish@latest
@@ -28,4 +28,4 @@ jobs:
           client_secret: ${{ secrets.SECRET }}
           refresh_token: ${{ secrets.TOKEN }}
           extension_id: ${{ secrets.EXTENSION_ID }}
-          zip_file: 'release.zip'
+          zip_file: 'LinkedinExtension.zip'
