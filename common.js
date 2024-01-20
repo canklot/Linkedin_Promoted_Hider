@@ -3,6 +3,7 @@ export const otherLangsList = [
     // Add your translation of promoted to this list
     "Promoted",
     "Öne çıkarılan içerik",
+    "Tanıtıldı",
     "Anzeige",
     "Promocionado",
     "Sponsorisé",
