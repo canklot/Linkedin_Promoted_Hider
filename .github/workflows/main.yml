@@ -1,12 +1,10 @@
-name: Publish
+name: Publish on store
 
 on:
   push:
-    tags:
-      - '*' 
 
 jobs:
-  build:
+  myjob:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,6 +17,9 @@ jobs:
 
       - name: Build zip file
         run: zip -r LinkedinExtension.zip .
+
+      - name: list all the files 
+        run: ls -la
 
       - name: Upload to Chrome Web Store
         uses: mobilefirstllc/cws-publish@latest
