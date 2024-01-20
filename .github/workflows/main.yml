@@ -13,7 +13,7 @@ jobs:
           node-version: 16
 
       - name: Build zip file
-        run: zip -r LinkedinExtension.zip .
+        run: zip -r LinkedinExtension.zip . -x .git
 
       - name: list all the files 
         run: ls -la
